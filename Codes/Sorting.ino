@@ -5,7 +5,7 @@
 
 #define WIFI_SSID "xxxxx" // логин Wi-Fi
 #define WIFI_PASSWORD "xxxxx" // пароль Wi-Fi
-#define BOT_TOKEN "xxxxx" // токен телеграмм бота 7015495636:AAGm0HaRi7QvQSLG_JrEtzWraZtj0betrME
+#define BOT_TOKEN "xxxxx" // токен телеграмм бота
 
 const unsigned long BOT_MTBS = 1000; // время обновления
 WiFiClientSecure secured_client; // клиент SSL (TLS)
