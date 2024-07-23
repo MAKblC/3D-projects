@@ -40,7 +40,6 @@ float UV_index;
 float tvoc;
 float co2;
 
-#define your_chat_ID "XXXXXXX" // ID вашего личного чата
 #define I2C_HUB_ADDR        0x70
 #define EN_MASK             0x08
 #define DEF_CHANNEL         0x00
