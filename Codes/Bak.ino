@@ -34,19 +34,6 @@ int sumL = 0;
 int target = 0;  //Объём который требуется набрать в мЛ
 
 float dist;
-// Константы для I2C шилда
-#define I2C_HUB_ADDR 0x70
-#define EN_MASK 0x08
-#define DEF_CHANNEL 0x00
-#define MAX_CHANNEL 0x08
-
-/*
-  I2C порт 0x07 - выводы GP16 (SDA), GP17 (SCL)
-  I2C порт 0x06 - выводы GP4 (SDA), GP13 (SCL)
-  I2C порт 0x05 - выводы GP14 (SDA), GP15 (SCL)
-  I2C порт 0x04 - выводы GP5 (SDA), GP23 (SCL)
-  I2C порт 0x03 - выводы GP18 (SDA), GP19 (SCL)
-*/
 
 void handleNewMessages(int numNewMessages) {
   Serial.print("handleNewMessages ");
