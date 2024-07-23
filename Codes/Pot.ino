@@ -2,7 +2,7 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>
-#include "FastLED.h"  
+#include "FastLED.h"
 #include <WiFi.h>
 #include <Wire.h>
 #include <BH1750.h>
@@ -12,24 +12,20 @@ BH1750 lightMeter;
 #include <Adafruit_BME280.h>
 Adafruit_BME280 bme280;
 
-#include "TLC59108.h"
+#include <PCA9634.h>
+PCA9634 testModule(0x1C);
 
-#define HW_RESET_PIN 0  // Только программный сброс
-#define I2C_ADDR TLC59108::I2C_ADDR::BASE
+#define WIFI_SSID "XXXXX"              // название вашего Wi-Fi
+#define WIFI_PASSWORD "XXXXXXXXXX"  // пароль вашего Wi-Fi
 
-TLC59108 leds(I2C_ADDR + 0);
-
-#define WIFI_SSID "xxxxx"              // название вашего Wi-Fi
-#define WIFI_PASSWORD "xxxxxxxxxx"     // пароль вашего Wi-Fi
-
-#define BOT_TOKEN "xxxxxxxxxxx:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  // Сюда введите ваш бот токен для Telegram
+#define BOT_TOKEN "XXXX:XXXXXXXXXXX"  // Сюда введите ваш бот токен для Telegram
 
 WiFiClientSecure secured_client;
 UniversalTelegramBot bot(BOT_TOKEN, secured_client);
-unsigned long bot_lasttime;  
+unsigned long bot_lasttime;
 
-TaskHandle_t Task1; // подпрограмма для первого ядра
-TaskHandle_t Task2; // подпрограмма для второго ядра
+TaskHandle_t Task1;  // подпрограмма для первого ядра
+TaskHandle_t Task2;  // подпрограмма для второго ядра
 
 #define I2C_HUB_ADDR 0x70
 #define EN_MASK 0x08
@@ -98,13 +94,13 @@ void handleNewMessages(int numNewMessages) {
       flag_svet = !flag_svet;
       setBusChannel(0x04);
       if (flag_svet) {
-        leds.setBrightness(3, 255);
-        leds.setBrightness(2, 255);
-        leds.setBrightness(5, 255);
+        testModule.write1(3, 0xFF);
+        testModule.write1(2, 0xFF);
+        testModule.write1(5, 0xFF);
       } else {
-        leds.setBrightness(3, 0);
-        leds.setBrightness(2, 0);
-        leds.setBrightness(5, 0);
+        testModule.write1(3, 0x00);
+        testModule.write1(2, 0x00);
+        testModule.write1(5, 0x00);
       }
       bot.sendMessage(chat_id, " Свет переключен в режим " + String(flag_auto), "");
     }
@@ -142,8 +138,13 @@ void setup() {
   setBusChannel(0x05);
   lightMeter.begin();
   setBusChannel(0x04);
-  leds.init(HW_RESET_PIN);
-  leds.setLedOutputMode(TLC59108::LED_MODE::PWM_IND);
+  testModule.begin();
+  for (int channel = 0; channel < testModule.channelCount(); channel++) {
+    testModule.setLedDriverMode(channel, PCA9634_LEDOFF);  // выключить все светодиоды в режиме 0/1
+  }
+  for (int channel = 0; channel < testModule.channelCount(); channel++) {
+    testModule.setLedDriverMode(channel, PCA9634_LEDPWM);  // установка режима ШИМ (0-255)
+  }
   bool bme_status = bme280.begin();
   if (!bme_status) {
     Serial.println("Не найден по адресу 0х77, пробую другой...");
@@ -155,7 +156,7 @@ void setup() {
   Serial.print("Connecting to Wifi SSID ");
   Serial.print(WIFI_SSID);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  secured_client.setCACert(TELEGRAM_CERTIFICATE_ROOT); 
+  secured_client.setCACert(TELEGRAM_CERTIFICATE_ROOT);
   if (WIFI_SSID != "логин")
     while (WiFi.status() != WL_CONNECTED) {
       Serial.print(".");
@@ -165,7 +166,7 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   Serial.print("Retrieving time: ");
-  configTime(0, 0, "pool.ntp.org");  
+  configTime(0, 0, "pool.ntp.org");
   time_t now = time(nullptr);
   if (WIFI_SSID != "логин")
     while (now < 24 * 3600) {
@@ -218,7 +219,7 @@ void Task1code(void* pvParameters) {
   }
 }
 
-//Task2code: 
+//Task2code:
 void Task2code(void* pvParameters) {
   Serial.print("Task2 running on core ");
   Serial.println(xPortGetCoreID());
@@ -235,18 +236,18 @@ void Task2code(void* pvParameters) {
       int power = 255 - lux;
       setBusChannel(0x04);
       if (power < 0) {
-        leds.setBrightness(3, 0);
-        leds.setBrightness(2, 0);
-        leds.setBrightness(5, 0);
+        testModule.write1(3, 0x00);
+        testModule.write1(2, 0x00);
+        testModule.write1(5, 0x00);
       } else {
         if (power > 255) {
-          leds.setBrightness(3, 255);
-          leds.setBrightness(2, 255);
-          leds.setBrightness(5, 255);
+          testModule.write1(3, 0xFF);
+          testModule.write1(2, 0xFF);
+          testModule.write1(5, 0xFF);
         } else {
-          leds.setBrightness(3, power);
-          leds.setBrightness(2, power);
-          leds.setBrightness(5, power);
+          testModule.write1(3, power);
+          testModule.write1(2, power);
+          testModule.write1(5, power);
         }
       }
 
