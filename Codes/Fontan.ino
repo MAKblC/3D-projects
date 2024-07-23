@@ -32,7 +32,7 @@ const int ledPin = 16;
 int ledStatus = 0;
 byte bright = 250;  // яркость LED светодиодов
 byte baza = 0;      // изменение оттенка LED
-#define NUM_LEDS 31
+#define NUM_LEDS 30
 #define PIN 4
 CRGB leds[NUM_LEDS];
 
