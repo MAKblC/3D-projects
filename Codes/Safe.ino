@@ -15,8 +15,6 @@ WiFiClientSecure secured_client;
 UniversalTelegramBot bot(BOT_TOKEN, secured_client);
 unsigned long bot_lasttime;  
 
-#include <FastLED.h>
-
 #include <Wire.h>
 
 #include <Wire.h>
